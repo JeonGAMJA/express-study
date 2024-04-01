@@ -1,3 +1,4 @@
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const jwt = require('jwt');
 
@@ -18,6 +19,7 @@ const posts = [
 ];
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/login', (req, res) => {
   const username = req.body.username;
@@ -50,6 +52,22 @@ function authMiddleware(req, res, next) {
     next();
   });
 }
+
+app.get('/refresh', (req, res) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.sendStatus(401);
+
+  const refreshToken = cookies.jwt;
+  if (!refreshTokens.includes(refreshToken)) {
+    return res.sendStatus(403);
+  }
+
+  jwt.verify(refreshToken, refreshScretText, (err, user) => {
+    if (err) return res.sendStatus(403);
+    const accessToken = jwt.sign({ name: user.name }, secretText, { expiresIn: '30s' });
+    res.json({ accessToken });
+  });
+});
 
 const port = 4000;
 app.listen(port, () => {
