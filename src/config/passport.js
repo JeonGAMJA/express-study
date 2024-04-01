@@ -4,27 +4,23 @@ const LocalStrategy = require('passport-local');
 passport.use(
   new LocalStrategy(
     { usernameField: 'email', passwordField: 'password' },
-    (email, password, done) => {
-      User.findOne(
-        {
-          email: email.toLocaleLowerCase(),
-        },
-        (err, user) => {
+    async (email, password, done) => {
+      try {
+        const existingUser = await User.findOne({ email: email.toLocaleLowerCase() });
+        if (!existingUser) {
+          return done(null, false, { msg: `Email ${email} not found` });
+        }
+
+        existingUser.comparePassword(password, (err, isMatch) => {
           if (err) return done(err);
 
-          if (!user) {
-            return done(null, false, { msg: `Email ${email} not found` });
-          }
+          if (isMatch) return done(null, existingUser);
 
-          user.comparePassword(password, (err, isMatch) => {
-            if (err) return done(err);
-
-            if (isMatch) return done(null, user);
-
-            return done(null, false, { msg: 'Invalid email or password.' });
-          });
-        },
-      );
+          return done(null, false, { msg: 'Invalid email or password.' });
+        });
+      } catch (error) {
+        return done(error);
+      }
     },
   ),
 );
