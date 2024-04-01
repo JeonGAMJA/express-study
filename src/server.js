@@ -1,13 +1,13 @@
 const express = require('express');
 const { default: mongoose } = require('mongoose');
-const passport = require('passort');
+const passport = require('passport');
 const app = express();
 const path = require('path');
 const User = require('./models/users.model');
 
 app.use(passport.initialize());
 app.use(passport.session());
-require('./config/pasport');
+require('./config/passport');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
