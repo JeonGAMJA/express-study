@@ -1,7 +1,13 @@
 const express = require('express');
 const { default: mongoose } = require('mongoose');
+const passport = require('passort');
 const app = express();
 const path = require('path');
+const User = require('./models/users.model');
+
+app.use(passport.initialize());
+app.use(passport.session());
+require('./config/pasport');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,13 +36,38 @@ app.get('/login', function (req, res, next) {
   res.render('login');
 });
 
-app.post('/login', (req, res, next) => {});
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      console.log('no user found');
+      return res.json({ msg: info });
+    }
+    req.logIn(user, function (err) {
+      if (err) return next(err);
+      res.redirect('/');
+    });
+  })(req, res, next);
+});
 
 app.get('/signup', function (req, res, next) {
   res.render('signup');
 });
 
-app.post('/signup', (req, res, next) => {});
+app.post('/signup', (req, res, next) => {
+  async (req, res, next) => {
+    const user = new User(req.body);
+    console.log(req.body);
+    try {
+      await user.save();
+      return res.status(200).json({
+        success: true,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+});
 
 const port = 4000;
 app.listen(port, () => {
