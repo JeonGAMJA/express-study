@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { default: mongoose } = require('mongoose');
 const passport = require('passport');
@@ -106,6 +107,15 @@ app.post('/signup', (req, res, next) => {
     }
   };
 });
+
+app.get('/auth/google', passport.authenticate('google'));
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', {
+    successReturnToOrRedirect: '/',
+    failureRedirect: '/login',
+  }),
+);
 
 const port = 4000;
 app.listen(port, () => {
