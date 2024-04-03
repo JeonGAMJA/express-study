@@ -4,6 +4,30 @@ const passport = require('passport');
 const app = express();
 const path = require('path');
 const User = require('./models/users.model');
+const cookieSession = require('cookie-session');
+
+const cookieEncryptionKey = 'supersecret-key';
+
+app.use(
+  cookieSession({
+    name: 'cookie-session-name',
+    keys: [cookieEncryptionKey],
+  }),
+);
+
+app.use(function (req, res, next) {
+  if (req.session && !req.session.regenerate) {
+    req.session.regenerate = (cb) => {
+      cb();
+    };
+  }
+  if (req.session && !req.session.save) {
+    req.session.save = (cb) => {
+      cb();
+    };
+  }
+  next();
+});
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -31,6 +55,10 @@ mongoose
   });
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.render('index');
+});
 
 app.get('/login', function (req, res, next) {
   res.render('login');
