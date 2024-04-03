@@ -5,6 +5,7 @@ const app = express();
 const path = require('path');
 const User = require('./models/users.model');
 const cookieSession = require('cookie-session');
+const { checkAuthenticated, checkNotAuthenticated } = require('./middlewares/auth');
 
 const cookieEncryptionKey = 'supersecret-key';
 
@@ -56,11 +57,11 @@ mongoose
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
+app.get('/', checkAuthenticated, (req, res) => {
   res.render('index');
 });
 
-app.get('/login', function (req, res, next) {
+app.get('/login', checkNotAuthenticated, function (req, res, next) {
   res.render('login');
 });
 
@@ -78,7 +79,7 @@ app.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
-app.get('/signup', function (req, res, next) {
+app.get('/signup', checkNotAuthenticated, function (req, res, next) {
   res.render('signup');
 });
 
