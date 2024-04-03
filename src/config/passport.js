@@ -38,13 +38,10 @@ passport.use(
   ),
 );
 
-const googleClientID = process.env.CLIENT_ID;
-const googleClientSecret = process.env.CLINET_SECRET;
-
 const googleStrategyConfig = new GoogleStrategy(
   {
-    clientID: googleClientID,
-    clientSecret: googleClientSecret,
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLINET_SECRET,
     callbackURL: '/auth/google/callback',
     scope: ['email', 'profile'],
   },

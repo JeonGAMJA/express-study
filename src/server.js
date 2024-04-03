@@ -8,12 +8,10 @@ const User = require('./models/users.model');
 const cookieSession = require('cookie-session');
 const { checkAuthenticated, checkNotAuthenticated } = require('./middlewares/auth');
 
-const cookieEncryptionKey = 'supersecret-key';
-
 app.use(
   cookieSession({
     name: 'cookie-session-name',
-    keys: [cookieEncryptionKey],
+    keys: [process.env.COOKIE_ENCRYPTION_KEY],
   }),
 );
 
@@ -45,10 +43,7 @@ app.set('view engine', 'ejs');
 mongoose.set('strictQuery', false);
 
 mongoose
-  .connect(
-    `mongodb+srv://jeonsohee:qwer1234@express-cluster.3anltzp.mongodb.net/?retryWrites=true&w=majority&appName=express-cluster
-`,
-  )
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log(`mongodb connected`);
   })
@@ -117,7 +112,10 @@ app.get(
   }),
 );
 
-const port = 4000;
-app.listen(port, () => {
+const config = require('config');
+const serverConfig = config.get('server');
+
+const port = serverConfig.port;
+app.listen(serverConfig.port, () => {
   console.log(`Listening on ${port}`);
 });
